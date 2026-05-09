@@ -17,5 +17,14 @@
   border-radius: 20px; 
 }
 
+.titleArea
+{
+    text-align: center;
+    background-image: url("styles-images/title-area-background.webp");
+    padding: 40px;
+    -webkit-text-fill-color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
 body {
 }
