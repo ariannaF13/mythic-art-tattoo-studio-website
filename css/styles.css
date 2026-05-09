@@ -1,0 +1,21 @@
+/*main styling page*/
+
+.footerBackground 
+{
+    text-align: center;
+    background-image: url("styles-images/footer-background.webp");
+    background-position: center;
+    padding: 40px; /* creates space so inner box doesn't touch edges */
+}
+
+.footerForeground
+{
+  background: white;
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto; 
+  border-radius: 20px; 
+}
+
+body {
+}
