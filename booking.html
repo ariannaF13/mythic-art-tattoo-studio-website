@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Ink Studio Scheduling</title>
+
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+
+<style>
+    *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box;
+        font-family:Arial, sans-serif;
+    }
+
+    body{
+        background:#111;
+        color:white;
+        padding:30px;
+    }
+
+    h1{
+        text-align:center;
+        margin-bottom:25px;
+        font-size:42px;
+        letter-spacing:2px;
+    }
+
+    .container{
+        max-width:1200px;
+        margin:auto;
+    }
+
+    #calendar{
+        background:white;
+        padding:20px;
+        border-radius:15px;
+        color:black;
+    }
+
+    .form-container{
+        margin-top:30px;
+        background:#1d1d1d;
+        padding:25px;
+        border-radius:15px;
+        display:none;
+    }
+
+    .form-container h2{
+        margin-bottom:20px;
+    }
+
+    input,
+    textarea,
+    select{
+        width:100%;
+        padding:12px;
+        margin-bottom:15px;
+        border:none;
+        border-radius:8px;
+        font-size:16px;
+    }
+
+    textarea{
+        resize:vertical;
+        min-height:120px;
+    }
+
+    button{
+        background:red;
+        color:white;
+        border:none;
+        padding:14px 20px;
+        border-radius:8px;
+        cursor:pointer;
+        font-size:16px;
+        transition:.2s;
+    }
+
+    button:hover{
+        background:#cc0000;
+    }
+
+    .admin-panel{
+        margin-top:40px;
+        background:#1d1d1d;
+        padding:25px;
+        border-radius:15px;
+    }
+
+    .booking-card{
+        background:#2b2b2b;
+        padding:15px;
+        margin-top:15px;
+        border-radius:10px;
+    }
+
+    .booking-card button{
+        margin-right:10px;
+        margin-top:10px;
+    }
+
+    .approve{
+        background:green;
+    }
+
+    .deny{
+        background:darkred;
+    }
+
+    .fc-event{
+        cursor:pointer;
+    }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>INK STUDIO BOOKING</h1>
+
+    <div id="calendar"></div>
+
+    <div class="form-container" id="bookingForm">
+
+        <h2>Request Appointment</h2>
+
+        <input type="text" id="name" placeholder="Full Name">
+
+        <input type="email" id="email" placeholder="Email Address">
+
+        <input type="text" id="phone" placeholder="Phone Number">
+
+        <select id="artist">
+            <option value="">Select Artist</option>
+            <option>Mike</option>
+            <option>Sarah</option>
+            <option>Alex</option>
+        </select>
+
+        <textarea id="details" placeholder="Describe the tattoo you want..."></textarea>
+
+        <button onclick="submitBooking()">Submit Request</button>
+
+    </div>
+
+    <div class="admin-panel">
+
+        <h2>Admin Booking Requests</h2>
+
+        <div id="bookingRequests"></div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
+<script>
+
+let selectedDate = "";
+
+let bookings = [];
+
+let approvedBookings = [
+    {
+        title: "BOOKED",
+        start: "2026-05-12",
+        color: "red"
+    },
+    {
+        title: "BOOKED",
+        start: "2026-05-18",
+        color: "red"
+    }
+];
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const calendarEl = document.getElementById('calendar');
+
+    window.calendar = new FullCalendar.Calendar(calendarEl, {
+
+        initialView: 'dayGridMonth',
+
+        selectable: true,
+
+        height: "auto",
+
+        events: approvedBookings,
+
+        dateClick: function(info){
+
+            selectedDate = info.dateStr;
+
+            document.getElementById("bookingForm").style.display = "block";
+
+            window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: "smooth"
+            });
+
+            alert("Selected Date: " + selectedDate);
+        }
+
+    });
+
+    calendar.render();
+});
+
+function submitBooking(){
+
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const phone = document.getElementById("phone").value;
+    const artist = document.getElementById("artist").value;
+    const details = document.getElementById("details").value;
+
+    if(!name || !email || !phone || !artist || !details){
+
+        alert("Please fill out all fields.");
+        return;
+    }
+
+    const booking = {
+        id: Date.now(),
+        name,
+        email,
+        phone,
+        artist,
+        details,
+        date: selectedDate
+    };
+
+    bookings.push(booking);
+
+    renderBookings();
+
+    alert("Appointment request submitted!");
+
+    document.getElementById("bookingForm").reset();
+
+    document.getElementById("bookingForm").style.display = "none";
+}
+
+function renderBookings(){
+
+    const container = document.getElementById("bookingRequests");
+
+    container.innerHTML = "";
+
+    bookings.forEach((booking) => {
+
+        const div = document.createElement("div");
+
+        div.classList.add("booking-card");
+
+        div.innerHTML = `
+            <h3>${booking.name}</h3>
+
+            <p><strong>Date:</strong> ${booking.date}</p>
+
+            <p><strong>Email:</strong> ${booking.email}</p>
+
+            <p><strong>Phone:</strong> ${booking.phone}</p>
+
+            <p><strong>Artist:</strong> ${booking.artist}</p>
+
+            <p><strong>Details:</strong> ${booking.details}</p>
+
+            <button class="approve" onclick="approveBooking(${booking.id})">
+                Approve
+            </button>
+
+            <button class="deny" onclick="denyBooking(${booking.id})">
+                Deny
+            </button>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+function approveBooking(id){
+
+    const booking = bookings.find(b => b.id === id);
+
+    approvedBookings.push({
+        title: "BOOKED",
+        start: booking.date,
+        color: "red"
+    });
+
+    calendar.addEvent({
+        title: "BOOKED",
+        start: booking.date,
+        color: "red"
+    });
+
+    bookings = bookings.filter(b => b.id !== id);
+
+    renderBookings();
+
+    alert("Booking approved!");
+}
+
+function denyBooking(id){
+
+    bookings = bookings.filter(b => b.id !== id);
+
+    renderBookings();
+
+    alert("Booking denied.");
+}
+
+</script>
+
+</body>
+</html>
